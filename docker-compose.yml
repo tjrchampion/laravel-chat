@@ -1,0 +1,42 @@
+version: '2'
+
+services:
+
+  app:
+    build:
+      context: ./
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ./web:/var/www
+    environment:
+      - DB_HOST=postgres #same name as service below
+      - DB_PORT=5432
+      - TZ=Europe/London
+
+  #web (nginx)
+  web:
+    build:
+      context: ./
+      dockerfile: web.dockerfile
+    working_dir: /var/www
+    volumes_from:
+      - app
+    ports: 
+      - "8080:80"
+
+  #MYSQL DB
+  postgres:
+    image: postgres:10.4
+    volumes:
+     - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - "POSTGRES_DB=app" #named whatever the project is
+      - "POSTGRES_USER=app"
+      - "POSTGRES_PASSWORD=secret"
+
+# #select volumes to use
+# volumes:
+#   ladata:
